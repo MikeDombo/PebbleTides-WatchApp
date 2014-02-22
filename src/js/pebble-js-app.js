@@ -46,11 +46,11 @@ function parseTide(response){
 					responseMessage = tide+" was "+(-tideTimehr) + hour+" and "+Math.abs(remainder)+" minutes ago";
 					}
 		responseMessage = responseMessage + " in "+city + ", "+state;	
-		}
+			}
 	else{
 		responseMessage = "Sorry, could not retreive tides for this location";
 		console.log("Failed to get tides");
-	}
+		}
 		Pebble.showSimpleNotificationOnPebble("Pebble Tides", responseMessage);
 	}
 		
@@ -63,7 +63,8 @@ function getTides(lat, lng) {
        console.log(req.responseText);
        response = JSON.parse(req.responseText);
 		if(response!=null && req.status == 200){
-			parseTide(response);}
+			parseTide(response);
+		}
 	}
   req.open('GET', "http://api.aerisapi.com/tides/closest?p=" + lat +","+ lng + "&client_id=eOQzJRTGPtPKdfokmpGQ9&client_secret=Elmx32lruftjejQDJWmyAgd1FMEp98LHHk9aVasg&radius=1000mi&from=-5hours&to=+6hours");
   req.send(null);	
@@ -77,9 +78,10 @@ function getTidesZip(zip) {
        console.log(req.responseText);
        response = JSON.parse(req.responseText);
 		if(response!=null && req.status == 200){
-			parseTide(response);}
+			parseTide(response);
+		}
 	}
-  req.open('GET', "http://api.aerisapi.com/tides/closest?p=" + zip + "&client_id=eOQzJRTGPtPKdfokmpGQ9&client_secret=Elmx32lruftjejQDJWmyAgd1FMEp98LHHk9aVasg&radius=1000mi&from=-5hours&to=+6hours");
+  req.open('GET', "http://api.aerisapi.com/tides/closest?p=" + zip + "&client_id=eOQzJRTGPtPKdfokmpGQ9&client_secret=Elmx32lruftjejQDJWmyAgd1FMEp98LHHk9aVasg&radius=1000mi&from=-8hours&plimit=2&psort=dt");
   req.send(null);
 	  }
 
@@ -129,6 +131,7 @@ function setUp(options){
 	localStorage.zip5 = options.zip5;
 	localStorage.zip6 = options.zip6;
 	localStorage.zip7 = options.zip7;
+	Pebble.showSimpleNotificationOnPebble("Pebble Tides", "Configuration Succeeded!");
 	runPos();
 }
 
@@ -140,6 +143,7 @@ Pebble.addEventListener("ready",
                         });
 Pebble.addEventListener("showConfiguration", function() {
   console.log("showing configuration");
+	Pebble.showSimpleNotificationOnPebble("Pebble Tides", "If configuration succeeds you will get a notification. If you do not, try again, as sometimes it takes 2 tries to set.");
   Pebble.openURL('http://mikedombrowski.com/pebbletides-config.html');
 });
 Pebble.addEventListener("configurationClosed", function(e) {  
