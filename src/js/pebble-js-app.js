@@ -141,6 +141,7 @@ Pebble.addEventListener("ready",
                         function(e) {
                           console.log("connect!" + e.ready);
                           console.log(e.type);
+						  runPos();
                         });
 Pebble.addEventListener("showConfiguration", function() {
   console.log("showing configuration");
