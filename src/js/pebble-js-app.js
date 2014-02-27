@@ -10,7 +10,7 @@ function parseTide(response){
 		  city = ((response.response[0].place.name).substring(0,1)).toUpperCase()+(response.response[0].place.name).substring(1,(response.response[0].place.name).length);
 		  state = (response.response[0].place.state).toUpperCase();
 		  var diffTime = tideTime - currTime;
-          /*console.log(tideLevel);
+         /* console.log(tideLevel);
 		  console.log(tideTime);
 		  console.log(city);
 		  console.log(state);
@@ -21,30 +21,30 @@ function parseTide(response){
 		var tideTimehr = Math.floor(tideTimemin/60);
 		var remainder = Math.round(tideTimemin - 60*(tideTimehr));
 		var hour;
+		var timePassed = new Array();
+		
 		if (Math.abs(tideTimehr) > 1){hour = " hours"}
 		else {hour = " hour"}
 		if(tideLevel == 'h'){var tide = "High tide";}
 		else {var tide = "Low tide";}
-			if(tideTimemin >= 60){
+		if(tideTimemin <= 0){
+			timePassed[0] = " was ";
+			timePassed[1] = " ago";}
+		else {
+			timePassed[0] = " is in ";
+			timePassed[1] = "";}
+			
+			if(Math.abs(tideTimemin)>=60) {
 				if (remainder == "0") {
-					responseMessage = tide+" is in "+tideTimehr + hour;
+					responseMessage = tide + timePassed[0] + tideTimehr + hour +timePassed[1];
 					}
 				else {
-					responseMessage = tide+" is in "+tideTimehr + hour+" and "+remainder+" minutes";
+					responseMessage = tide + timePassed[0] + tideTimehr + hour+ " and "+remainder+" minutes" + timePassed[1];
 					}
 				}
-				else if(tideTimemin < 60 && tideTimemin > 0) {
-					responseMessage = tide+" is in "+remainder + " minutes";
-				}
-				else if(tideTimemin > -60 && tideTimemin < 0) {
-					responseMessage = tide+" was "+Math.round(Math.abs(tideTimemin)) + " minutes ago";
-				}
-				else if (tideTimemin <= -60 && remainder == "0"){
-					responseMessage = tide+" was "+(-tideTimehr) + hour+" ago";
-					}
-				else if (tideTimemin < -60) {
-					responseMessage = tide+" was "+(-tideTimehr) + hour+" and "+Math.abs(remainder)+" minutes ago";
-					}
+			else{
+				responseMessage = tide + timePassed[0] + Math.round(Math.abs(tideTimemin)) + " minutes" + timePassed[1];
+			}
 		responseMessage = responseMessage + " in "+city + ", "+state;	
 			}
 	else{
