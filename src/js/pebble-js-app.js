@@ -23,13 +23,13 @@ function parseTide(response){
 		var hour;
 		if (Math.abs(tideTimehr) > 1){hour = " hours"}
 		else {hour = " hour"}
-			if(tideLevel == 'h'){var tide = "High tide";}
-			else {var tide = "Low tide";}
-				if(tideTimemin >= 60){
-					if (remainder == "0") {
+		if(tideLevel == 'h'){var tide = "High tide";}
+		else {var tide = "Low tide";}
+			if(tideTimemin >= 60){
+				if (remainder == "0") {
 					responseMessage = tide+" is in "+tideTimehr + hour;
 					}
-					else {
+				else {
 					responseMessage = tide+" is in "+tideTimehr + hour+" and "+remainder+" minutes";
 					}
 				}
@@ -37,7 +37,7 @@ function parseTide(response){
 					responseMessage = tide+" is in "+remainder + " minutes";
 				}
 				else if(tideTimemin > -60 && tideTimemin < 0) {
-					responseMessage = tide+" was "+Math.Round(Math.abs(tideTimemin)) + " minutes ago";
+					responseMessage = tide+" was "+Math.round(Math.abs(tideTimemin)) + " minutes ago";
 				}
 				else if (tideTimemin <= -60 && remainder == "0"){
 					responseMessage = tide+" was "+(-tideTimehr) + hour+" ago";
@@ -51,6 +51,7 @@ function parseTide(response){
 		responseMessage = "Sorry, could not retreive tides for this location";
 		console.log("Failed to get tides");
 		}
+		console.log(responseMessage);
 		Pebble.showSimpleNotificationOnPebble("Pebble Tides", responseMessage);
 	}
 		
