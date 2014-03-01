@@ -18,8 +18,8 @@ function parseTide(response){
 		var responseMessage;
 		var tide;
 		var tideTimemin = ((diffTime)/60);
-		var tideTimehr = Math.floor(tideTimemin/60);
-		var remainder = Math.round(tideTimemin - 60*(tideTimehr));
+		var tideTimehr = (tideTimemin-(tideTimemin%60))/60;
+		//var remainder = Math.round(tideTimemin - 60*(tideTimehr));
 		var hour;
 		var timePassed = new Array();
 		
@@ -35,11 +35,11 @@ function parseTide(response){
 			timePassed[1] = "";}
 			
 			if(Math.abs(tideTimemin)>=60) {
-				if (remainder == "0") {
-					responseMessage = tide + timePassed[0] + tideTimehr + hour +timePassed[1];
+				if (tideTimemin%60 == "0") {
+					responseMessage = tide + timePassed[0] + Math.abs(tideTimehr) + hour +timePassed[1];
 					}
 				else {
-					responseMessage = tide + timePassed[0] + tideTimehr + hour+ " and "+remainder+" minutes" + timePassed[1];
+					responseMessage = tide + timePassed[0] + Math.abs(tideTimehr) + hour+ " and "+Math.round(Math.abs(tideTimemin%60))+" minutes" + timePassed[1];
 					}
 				}
 			else{
@@ -145,7 +145,7 @@ Pebble.addEventListener("ready",
                         });
 Pebble.addEventListener("showConfiguration", function() {
   console.log("showing configuration");
-	Pebble.showSimpleNotificationOnPebble("Pebble Tides", "If configuration succeeds you will get a notification. If you do not, try again, as sometimes it takes 2 tries to set.");
+	//Pebble.showSimpleNotificationOnPebble("Pebble Tides", "If configuration succeeds you will get a notification. If you do not, try again, as sometimes it takes 2 tries to set.");
   Pebble.openURL('http://mikedombrowski.com/pebbletides-config.html');
 });
 Pebble.addEventListener("configurationClosed", function(e) {  
