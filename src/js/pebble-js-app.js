@@ -200,6 +200,11 @@ function setUp(options){
 	simply.body("Configuration Success!");
 }
 
+Pebble.addEventListener("showConfiguration", function() {
+	Pebble.openURL("http://mikedombrowski.com/pebbletides-config.html")
+})
+
+
 Pebble.addEventListener("webviewclosed", function(e) {  
 	console.log("configuration closed, webview");
   var options = JSON.parse(decodeURIComponent(e.response));
@@ -222,5 +227,5 @@ simply.scrollable(true);
 simply.style("small");
 simply.setText({
   title: 'Pebble Tides',
-   body: 'Press \'Select\' to Get Tides. \nLong Click \'Select\' to Configure.\n\nCurrent Configuration:\nGPS is '+localStorage.useGPS+'\nZip 1: '+localStorage.zip1+'\nZip 2: '+localStorage.zip2+'\nZip 3: '+localStorage.zip3+'\nZip 4: '+localStorage.zip4+'\nZip 5: '+localStorage.zip5+'\nZip 6: '+localStorage.zip6+'\nZip 7: '+localStorage.zip7,
+   body: 'Press \'Select\' to Get Tides.\n\nCurrent Configuration:\nGPS is '+localStorage.useGPS+'\nZip 1: '+localStorage.zip1+'\nZip 2: '+localStorage.zip2+'\nZip 3: '+localStorage.zip3+'\nZip 4: '+localStorage.zip4+'\nZip 5: '+localStorage.zip5+'\nZip 6: '+localStorage.zip6+'\nZip 7: '+localStorage.zip7,
 }, true);
