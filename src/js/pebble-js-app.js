@@ -188,7 +188,7 @@ function runPos() {
 }
 
 function setUp(options){
-	console.log("setup called")
+	console.log("setup called");
 	localStorage.useGPS = options.gps;
 	localStorage.zip1 = options.zip1;
 	localStorage.zip2 = options.zip2;
@@ -201,8 +201,8 @@ function setUp(options){
 }
 
 Pebble.addEventListener("showConfiguration", function() {
-	Pebble.openURL("http://mikedombrowski.com/pebbletides-config.html")
-})
+	Pebble.openURL("http://mikedombrowski.com/pebbletides-config.html");
+});
 
 
 Pebble.addEventListener("webviewclosed", function(e) {  
