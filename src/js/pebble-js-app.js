@@ -1,4 +1,5 @@
 //setup global variables
+var version = "2.3.1";
 var gpsResp = "";
 var zip1Resp = "";
 var zip2Resp = "";
@@ -30,7 +31,7 @@ function parseTide(response, name){
 		var timePassed = new Array("","");
 		var minute;
 //Decide on grammar/english to use
-		if(Math.abs(tideTimemin == 1 || tideTimemin%60 == 1)){minute=" minute";}
+		if((Math.round(Math.abs(tideTimemin)) == 1 || Math.round(Math.abs(tideTimemin%60)) == 1)){minute=" minute";}
 		else {minute=" minutes";}
 		if (Math.abs(tideTimehr) > 1){hour = " hours";}
 		else {hour = " hour";}
@@ -146,7 +147,7 @@ function showPosition(position) {
 
 //Run it
 function runPos() {
-	//clear variables
+//clear variables
 	gpsResp = "";
 	zip1Resp = "";
 	zip2Resp = "";
@@ -155,7 +156,7 @@ function runPos() {
 	zip5Resp = "";
 	zip6Resp = "";
 	zip7Resp = "";
-	//Choose which zips/gps to find tides for
+//Choose which zips/gps to find tides for
 	if(localStorage.useGPS == "on"){
 		navigator.geolocation.getCurrentPosition(showPosition);
 	}
@@ -237,5 +238,5 @@ simply.style("small");
 simply.setText({
    title: 'Pebble Tides',
    body: 'Press \'Select\' to Get Tides.\n\nCurrent Configuration:\nGPS is '+localStorage.useGPS+'\nZip 1: '+localStorage.zip1+'\nZip 2: '+localStorage.zip2+'\nZip 3: '+localStorage.zip3+'\nZip 4: '+localStorage.zip4+'\nZip 5: '+localStorage.zip5+'\nZip 6: '+localStorage.zip6+'\nZip 7: '+localStorage.zip7+
-	'\n\nBy Michael Dombrowski\nMikeDombrowski.com\n\nVersion 2.3.0',
+	'\n\nBy Michael Dombrowski\nMikeDombrowski.com\n\nVersion '+version,
 }, true);
