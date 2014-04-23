@@ -1,3 +1,14 @@
+//setup global variables
+var gpsResp = "";
+var zip1Resp = "";
+var zip2Resp = "";
+var zip3Resp = "";
+var zip4Resp = "";
+var zip5Resp = "";
+var zip6Resp = "";
+var zip7Resp = "";
+
+//Parse tide data 
 function parseTide(response, name){
 //setup Vars
 		var responseMessage;	
@@ -6,20 +17,20 @@ function parseTide(response, name){
 		var city;
 		var state;
 		var currTime = Math.round(Date.now()/1000);
-        if (response.success === true) {
-        tideLevel = response.response[0].periods[0].type;
-		tideTime = response.response[0].periods[0].timestamp;
-		city = ((response.response[0].place.name).substring(0,1)).toUpperCase()+(response.response[0].place.name).substring(1,(response.response[0].place.name).length);
-		state = (response.response[0].place.state).toUpperCase();
+        if (response.success === true && response.error === null) {
+			tideLevel = response.response[0].periods[0].type;
+			tideTime = response.response[0].periods[0].timestamp;
+			city = ((response.response[0].place.name).substring(0,1)).toUpperCase()+(response.response[0].place.name).substring(1,(response.response[0].place.name).length);
+			state = (response.response[0].place.state).toUpperCase();
 		var diffTime = tideTime - currTime;
 		var tide;
 		var tideTimemin = ((diffTime)/60);
 		var tideTimehr = (tideTimemin-(tideTimemin%60))/60;
 		var hour;
-		var timePassed = new Array();
+		var timePassed = new Array("","");
 		var minute;
 //Decide on grammar/english to use
-		if(Math.abs(tideTimemin==1)){minute=" minute";}
+		if(Math.abs(tideTimemin == 1 || tideTimemin%60 == 1)){minute=" minute";}
 		else {minute=" minutes";}
 		if (Math.abs(tideTimehr) > 1){hour = " hours";}
 		else {hour = " hour";}
@@ -50,85 +61,69 @@ function parseTide(response, name){
 		console.log("Failed to get tides");
 		}
 	if(name == "gps") {
-		sessionStorage.gpsResp = responseMessage+"\n\n";
+		gpsResp = responseMessage+"\n\n";
 	}
 	else if(name == "zip1"){
-		sessionStorage.zip1Resp = responseMessage+"\n\n";
+		zip1Resp = responseMessage+"\n\n";
 	}
 	else if(name == "zip2"){
-		sessionStorage.zip2Resp = responseMessage+"\n\n";
+		zip2Resp = responseMessage+"\n\n";
 	}
 	else if(name == "zip3"){
-		sessionStorage.zip3Resp = responseMessage+"\n\n";
+		zip3Resp = responseMessage+"\n\n";
 	}
 	else if(name == "zip4"){
-		sessionStorage.zip4Resp = responseMessage+"\n\n";
+		zip4Resp = responseMessage+"\n\n";
 	}
 	else if(name == "zip5"){
-		sessionStorage.zip5Resp = responseMessage+"\n\n";
+		zip5Resp = responseMessage+"\n\n";
 	}
 	else if(name == "zip6"){
-		sessionStorage.zip6Resp = responseMessage+"\n\n";
+		zip6Resp = responseMessage+"\n\n";
 	}
 	else if(name == "zip7"){
-		sessionStorage.zip7Resp = responseMessage;
+		zip7Resp = responseMessage;
 	}
 		print();
 }
 
+//Print the tide data
 function print(){
 	simply.style("large");
 	simply.scrollable(true);
 	var responseMessage;
-	if(sessionStorage.gpsResp !== null){
-	responseMessage = sessionStorage.gpsResp;	
+	if(gpsResp !== null){
+	responseMessage = gpsResp;	
 	}
-	if(sessionStorage.zip1Resp !== null){
-	responseMessage = responseMessage+sessionStorage.zip1Resp;	
+	if(zip1Resp !== null){
+	responseMessage = responseMessage+zip1Resp;	
 	}
-	if(sessionStorage.zip2Resp !== null){
-	responseMessage = responseMessage+sessionStorage.zip2Resp;	
+	if(zip2Resp !== null){
+	responseMessage = responseMessage+zip2Resp;	
 	}
-	if(sessionStorage.zip3Resp !== null){
-	responseMessage = responseMessage+sessionStorage.zip3Resp;	
+	if(zip3Resp !== null){
+	responseMessage = responseMessage+zip3Resp;	
 	}
-	if(sessionStorage.zip4Resp !== null){
-	responseMessage = responseMessage+sessionStorage.zip4Resp;	
+	if(zip4Resp !== null){
+	responseMessage = responseMessage+zip4Resp;	
 	}
-	if(sessionStorage.zip5Resp !== null){
-	responseMessage = responseMessage+sessionStorage.zip5Resp;	
+	if(zip5Resp !== null){
+	responseMessage = responseMessage+zip5Resp;	
 	}
-	if(sessionStorage.zip6Resp !== null){
-	responseMessage = responseMessage+sessionStorage.zip6Resp;	
+	if(zip6Resp !== null){
+	responseMessage = responseMessage+zip6Resp;	
 	}
-	if(sessionStorage.zip7Resp !== null){
-	responseMessage = responseMessage+sessionStorage.zip7Resp;	
+	if(zip7Resp !== null){
+	responseMessage = responseMessage+zip7Resp;	
 	}
 	simply.body(responseMessage);
 	simply.vibe();
-	//Pebble.showSimpleNotificationOnPebble("Pebble Tides", responseMessage);
-
-}
-function getTides(lat, lng) {
-	console.log("called getTides with lat lng");
-	var response;
-	var name = "gps";
-	var req = new XMLHttpRequest();
-	req.onload = function(e) {
-       console.log(req.responseText);
-       response = JSON.parse(req.responseText);
-		if(response!==null && req.status == 200){
-			sessionStorage.gpsDone=true;
-			parseTide(response, name);
-		}
-	};
-  req.open('GET', "http://api.aerisapi.com/tides/closest?p=" + lat +","+ lng + "&client_id=eOQzJRTGPtPKdfokmpGQ9&client_secret=Elmx32lruftjejQDJWmyAgd1FMEp98LHHk9aVasg&radius=1000mi&from=-8hours&plimit=2&psort=dt");
-  req.send(null);	
 }
 
-function getTidesZip(zip, name) {
+//Actually get the tides and package it to send to parseTide
+function getTides(zip, name) {
 	zip = zip.replace(/\s+/g, "%20");
-	console.log("called getTides with zip: "+zip);
+	console.log("called getTides using: "+zip);
 	var response;
 	var req = new XMLHttpRequest();
 	req.onload = function(e) {
@@ -136,58 +131,58 @@ function getTidesZip(zip, name) {
        response = JSON.parse(req.responseText);
 		if(response!==null && req.status == 200){
 			parseTide(response, name);
-		}
-	};
+		}};
   req.open('GET', "http://api.aerisapi.com/tides/closest?p=" + zip + "&client_id=eOQzJRTGPtPKdfokmpGQ9&client_secret=Elmx32lruftjejQDJWmyAgd1FMEp98LHHk9aVasg&radius=1000mi&from=-8hours&plimit=2&psort=dt");
   req.send(null);
 }
 
+//Use GPS to get tides
 function showPosition(position) {
-    sessionStorage.lat = position.coords.latitude;
-	sessionStorage.lng = position.coords.longitude;
-	var lat = position.coords.latitude;
+    var lat = position.coords.latitude;
 	var lng = position.coords.longitude;
-	console.log("called sessionstorage "+lat+" "+lng);
-	getTides(lat, lng);
+	console.log("using gps "+lat+" "+lng);
+	getTides(lat+","+lng, "gps");
     }
 
+//Run it
 function runPos() {
-	sessionStorage.gpsResp="";
-	sessionStorage.zip1Resp="";
-	sessionStorage.zip2Resp="";
-	sessionStorage.zip3Resp="";
-	sessionStorage.zip4Resp="";
-	sessionStorage.zip5Resp="";
-	sessionStorage.zip6Resp="";
-	sessionStorage.zip7Resp="";
-
+	//clear variables
+	gpsResp = "";
+	zip1Resp = "";
+	zip2Resp = "";
+	zip3Resp = "";
+	zip4Resp = "";
+	zip5Resp = "";
+	zip6Resp = "";
+	zip7Resp = "";
+	//Choose which zips/gps to find tides for
 	if(localStorage.useGPS == "on"){
-		localStorage.gpsDone=false;
 		navigator.geolocation.getCurrentPosition(showPosition);
 	}
-	if(localStorage.zip1 !== ""){
-		getTidesZip(localStorage.zip1, "zip1");
+	if(localStorage.zip1 !== "" && localStorage.zip1 !== null){
+		getTides(localStorage.zip1, "zip1");
 	}
-	if(localStorage.zip2 !== ""){
-		getTidesZip(localStorage.zip2, "zip2");
+	if(localStorage.zip2 !== "" && localStorage.zip2 !== null){
+		getTides(localStorage.zip2, "zip2");
 	}
-	if(localStorage.zip3 !== ""){
-		getTidesZip(localStorage.zip3, "zip3");
+	if(localStorage.zip3 !== "" && localStorage.zip3 !== null){
+		getTides(localStorage.zip3, "zip3");
 	}
-	if(localStorage.zip4 !== ""){
-		getTidesZip(localStorage.zip4, "zip4");
+	if(localStorage.zip4 !== "" && localStorage.zip4 !== null){
+		getTides(localStorage.zip4, "zip4");
 	}
-    if(localStorage.zip5 !== ""){
-		getTidesZip(localStorage.zip5, "zip5");
+    if(localStorage.zip5 !== "" && localStorage.zip5 !== null){
+		getTides(localStorage.zip5, "zip5");
 	}
-	if(localStorage.zip6 !== ""){
-		getTidesZip(localStorage.zip6, "zip6");
+	if(localStorage.zip6 !== "" && localStorage.zip6 !== null){
+		getTides(localStorage.zip6, "zip6");
 	}
-	if(localStorage.zip7 !== ""){
-		getTidesZip(localStorage.zip7, "zip7");
+	if(localStorage.zip7 !== "" && localStorage.zip7 !== null){
+		getTides(localStorage.zip7, "zip7");
 	}
 }
 
+//Apply Selected Configuration Options
 function setUp(options){
 	console.log("setup called");
 	localStorage.useGPS = options.gps;
@@ -201,10 +196,12 @@ function setUp(options){
 	simply.body("Configuration Success!");
 }
 
+//
+//Pebble Listeners
+//
 Pebble.addEventListener("showConfiguration", function() {
 	Pebble.openURL("http://mikedombrowski.com/pebbletides-config.html");
 });
-
 
 Pebble.addEventListener("webviewclosed", function(e) {  
 	console.log("configuration closed, webview");
@@ -225,19 +222,20 @@ Pebble.addEventListener("configurationClosed", function(e) {
 });
 
 
+//
+//Simply.js Stuff
+//
 simply.on('singleClick', function(e) {
 	if(e.button == "select"){
 		runPos();}
 });
-
 simply.on('longClick', function(e) {
    Pebble.openURL('http://mikedombrowski.com/pebbletides-config.html');
 });
-
 simply.scrollable(true);
 simply.style("small");
 simply.setText({
    title: 'Pebble Tides',
    body: 'Press \'Select\' to Get Tides.\n\nCurrent Configuration:\nGPS is '+localStorage.useGPS+'\nZip 1: '+localStorage.zip1+'\nZip 2: '+localStorage.zip2+'\nZip 3: '+localStorage.zip3+'\nZip 4: '+localStorage.zip4+'\nZip 5: '+localStorage.zip5+'\nZip 6: '+localStorage.zip6+'\nZip 7: '+localStorage.zip7+
-	'\n\nBy Michael Dombrowski\nMikeDombrowski.com\n\nVersion 2.2.4',
+	'\n\nBy Michael Dombrowski\nMikeDombrowski.com\n\nVersion 2.3.0',
 }, true);
