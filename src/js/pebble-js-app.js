@@ -1,5 +1,5 @@
 //setup global variables
-var version = "2.3.1";
+var version = "2.4.0";
 var gpsResp = "";
 var zip1Resp = "";
 var zip2Resp = "";
@@ -8,21 +8,46 @@ var zip4Resp = "";
 var zip5Resp = "";
 var zip6Resp = "";
 var zip7Resp = "";
+checkUpdates();
+
+//Check for updates
+function checkUpdates(){
+	var response;
+	var req = new XMLHttpRequest();
+	req.onload = function(e) {
+       response = req.responseText;
+		if(response!==null && req.status == 200){
+			var current = version.split(".");
+			console.log("web version "+response.substring(9,10)+"."+response.substring(19,20)+"."+response.substring(30,31)+" current version"+current[0]+"."+current[1]+"."+current[2]);
+			if(response.substring(9,10)>current[0]){
+				localStorage.update = "true";
+			}
+			else if(response.substring(19,20)>current[1]){
+				localStorage.update = "true";
+			}
+			else if(response.substring(30,31)>current[2]){
+				localStorage.update =  "true";
+			}
+			else{localStorage.update = "false";}
+		}};
+  req.open('GET', "http://mikedombrowski.com/pbtides-version");
+  req.send(null);
+}
 
 //Parse tide data 
 function parseTide(response, name){
 //setup Vars
-		var responseMessage;	
-		var tideLevel;
-		var tideTime;
-		var city;
-		var state;
-		var currTime = Math.round(Date.now()/1000);
-        if (response.success === true && response.error === null) {
-			tideLevel = response.response[0].periods[0].type;
-			tideTime = response.response[0].periods[0].timestamp;
-			city = ((response.response[0].place.name).substring(0,1)).toUpperCase()+(response.response[0].place.name).substring(1,(response.response[0].place.name).length);
-			state = (response.response[0].place.state).toUpperCase();
+	var responseMessage;	
+	var tideLevel;
+	var tideTime;
+	var city;
+	var state;
+	var currTime = Math.round(Date.now()/1000);
+	if (response.success === true && response.error === null) {
+		tideLevel = response.response[0].periods[0].type;
+		tideTime = response.response[0].periods[0].timestamp;
+		city = ((response.response[0].place.name).substring(0,1)).toUpperCase()+(response.response[0].place.name).substring(1);
+		state = (response.response[0].place.state).toUpperCase();
 		var diffTime = tideTime - currTime;
 		var tide;
 		var tideTimemin = ((diffTime)/60);
@@ -44,22 +69,21 @@ function parseTide(response, name){
 			timePassed[0] = " is in ";
 			timePassed[1] = "";}
 //Put together responseMessage
-			if(Math.abs(tideTimemin)>=60) {
-				if (tideTimemin%60 == "0") {
-					responseMessage = tide + timePassed[0] + Math.abs(tideTimehr) + hour +timePassed[1];
-					}
-				else {
-					responseMessage = tide + timePassed[0] + Math.abs(tideTimehr) + hour+ " and "+Math.round(Math.abs(tideTimemin%60))+ minute + timePassed[1];
-					}
+		if(Math.abs(tideTimemin)>=60) {
+			if (tideTimemin%60 == "0") {
+				responseMessage = tide + timePassed[0] + Math.abs(tideTimehr) + hour + timePassed[1];
 				}
-			else{
-				responseMessage = tide + timePassed[0] + Math.round(Math.abs(tideTimemin)) + minute + timePassed[1];
+			else {
+				responseMessage = tide + timePassed[0] + Math.abs(tideTimehr) + hour + " and " + Math.round(Math.abs(tideTimemin%60)) + minute + timePassed[1];
+				}
 			}
-		responseMessage = responseMessage + " in "+city + ", "+state;
+		else{
+			responseMessage = tide + timePassed[0] + Math.round(Math.abs(tideTimemin)) + minute + timePassed[1];
 			}
+		responseMessage = responseMessage + " in " + city + ", " + state;
+		}
 	else{
 		responseMessage = "Sorry, could not retreive tides for this location";
-		console.log("Failed to get tides");
 		}
 	if(name == "gps") {
 		gpsResp = responseMessage+"\n\n";
@@ -85,40 +109,15 @@ function parseTide(response, name){
 	else if(name == "zip7"){
 		zip7Resp = responseMessage;
 	}
-		print();
+	print();
 }
 
 //Print the tide data
 function print(){
 	simply.style("large");
 	simply.scrollable(true);
-	var responseMessage;
-	if(gpsResp !== null){
-	responseMessage = gpsResp;	
-	}
-	if(zip1Resp !== null){
-	responseMessage = responseMessage+zip1Resp;	
-	}
-	if(zip2Resp !== null){
-	responseMessage = responseMessage+zip2Resp;	
-	}
-	if(zip3Resp !== null){
-	responseMessage = responseMessage+zip3Resp;	
-	}
-	if(zip4Resp !== null){
-	responseMessage = responseMessage+zip4Resp;	
-	}
-	if(zip5Resp !== null){
-	responseMessage = responseMessage+zip5Resp;	
-	}
-	if(zip6Resp !== null){
-	responseMessage = responseMessage+zip6Resp;	
-	}
-	if(zip7Resp !== null){
-	responseMessage = responseMessage+zip7Resp;	
-	}
+	var responseMessage =  localStorage.updateLanguage + gpsResp + zip1Resp + zip2Resp + zip3Resp + zip4Resp + zip5Resp + zip6Resp + zip7Resp;
 	simply.body(responseMessage);
-	simply.vibe();
 }
 
 //Actually get the tides and package it to send to parseTide
@@ -147,6 +146,9 @@ function showPosition(position) {
 
 //Run it
 function runPos() {
+	if(localStorage.update == "true"){
+		localStorage.updateLanguage = "A new update was found, please remove the app from your watch and reinstall\n\n";}
+	else{localStorage.updateLanguage = "";}
 //clear variables
 	gpsResp = "";
 	zip1Resp = "";
@@ -203,7 +205,6 @@ function setUp(options){
 Pebble.addEventListener("showConfiguration", function() {
 	Pebble.openURL("http://mikedombrowski.com/pebbletides-config.html");
 });
-
 Pebble.addEventListener("webviewclosed", function(e) {  
 	console.log("configuration closed, webview");
 	var options = JSON.parse(decodeURIComponent(e.response));
@@ -213,16 +214,6 @@ Pebble.addEventListener("webviewclosed", function(e) {
 	}
 });
 
-Pebble.addEventListener("configurationClosed", function(e) {  
-	console.log("configuration closed, config closed");
-	var options = JSON.parse(decodeURIComponent(e.response));
-	console.log("Options = " + JSON.stringify(options));
-	if(options.gps == "on" || options.gps == "off"){
-		setUp(options);
-	}
-});
-
-
 //
 //Simply.js Stuff
 //
@@ -230,13 +221,9 @@ simply.on('singleClick', function(e) {
 	if(e.button == "select"){
 		runPos();}
 });
-simply.on('longClick', function(e) {
-   Pebble.openURL('http://mikedombrowski.com/pebbletides-config.html');
-});
 simply.scrollable(true);
 simply.style("small");
 simply.setText({
    title: 'Pebble Tides',
    body: 'Press \'Select\' to Get Tides.\n\nCurrent Configuration:\nGPS is '+localStorage.useGPS+'\nZip 1: '+localStorage.zip1+'\nZip 2: '+localStorage.zip2+'\nZip 3: '+localStorage.zip3+'\nZip 4: '+localStorage.zip4+'\nZip 5: '+localStorage.zip5+'\nZip 6: '+localStorage.zip6+'\nZip 7: '+localStorage.zip7+
-	'\n\nBy Michael Dombrowski\nMikeDombrowski.com\n\nVersion '+version,
-}, true);
+	'\n\nBy Michael Dombrowski\nMikeDombrowski.com\n\nVersion '+version,}, true);
