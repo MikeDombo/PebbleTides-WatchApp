@@ -1,5 +1,5 @@
 //setup global variables
-var version = "2.5.0";
+var version = "2.5.1";
 var printer;
 checkUpdates();
 
@@ -105,17 +105,14 @@ function getTides(zip, name) {
 function showPosition(position) {
     var lat = position.coords.latitude;
 	var lng = position.coords.longitude;
-	console.log("using gps "+lat+" "+lng);
 	getTides(lat+","+lng, "gps");
     }
 
 //Run it
 function runPos() {
 	if(localStorage.update == "true"){
-		localStorage.updateLanguage = "A new update was found, please remove the app from your watch and reinstall\n\n";}
-	else{localStorage.updateLanguage = "";}
-//clear variable
-	printer = "";
+		printer = "A new update was found, please unload the app from your watch and reload\n\n";}
+	else{printer = "";}
 //Choose which zips/gps to find tides for
 	if(localStorage.useGPS == "on"){
 		navigator.geolocation.getCurrentPosition(showPosition);
@@ -154,18 +151,16 @@ function setUp(options){
 	localStorage.zip5 = options.zip5;
 	localStorage.zip6 = options.zip6;
 	localStorage.zip7 = options.zip7;
-	simply.body("Configuration Success!");
+	mainPage();
 }
 
 //
 //Pebble Listeners
 //
 Pebble.addEventListener("showConfiguration", function(e) {
-	console.log("showing config");
 	Pebble.openURL("http://mikedombrowski.com/pebbletides-config.html");
 });
-Pebble.addEventListener("webviewclosed", function(e) {  
-	console.log("configuration closed");
+Pebble.addEventListener("webviewclosed", function(e) {
 	var options = JSON.parse(decodeURIComponent(e.response));
 	console.log("Options = " + JSON.stringify(options));
 	if(options.gps == "on" || options.gps == "off"){
@@ -180,9 +175,12 @@ simply.on('singleClick', function(e) {
 	if(e.button == "select"){
 		runPos();}
 });
-simply.scrollable(true);
-simply.style("small");
-simply.setText({
-   title: 'Pebble Tides',
-   body: 'Press \'Select\' to Get Tides.\n\nCurrent Configuration:\nGPS is '+localStorage.useGPS+'\nZip 1: '+localStorage.zip1+'\nZip 2: '+localStorage.zip2+'\nZip 3: '+localStorage.zip3+'\nZip 4: '+localStorage.zip4+'\nZip 5: '+localStorage.zip5+'\nZip 6: '+localStorage.zip6+'\nZip 7: '+localStorage.zip7+
-	'\n\nBy Michael Dombrowski\nMikeDombrowski.com\n\nVersion '+version,}, true);
+mainPage();
+function mainPage(){
+	simply.scrollable(true);
+	simply.style("small");
+	simply.setText({
+		title: 'Pebble Tides',
+		body: 'Press \'Select\' to Get Tides.\n\nCurrent Configuration:\nGPS is '+localStorage.useGPS+'\nZip 1: '+localStorage.zip1+'\nZip 2: '+localStorage.zip2+'\nZip 3: '+localStorage.zip3+'\nZip 4: '+localStorage.zip4+'\nZip 5: '+localStorage.zip5+'\nZip 6: '+localStorage.zip6+'\nZip 7: '+localStorage.zip7+
+		'\n\nBy Michael Dombrowski\nMikeDombrowski.com\n\nVersion '+version,}, true);
+}
