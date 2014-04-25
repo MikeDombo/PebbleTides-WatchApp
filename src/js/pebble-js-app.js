@@ -1,13 +1,6 @@
 //setup global variables
-var version = "2.4.0";
-var gpsResp = "";
-var zip1Resp = "";
-var zip2Resp = "";
-var zip3Resp = "";
-var zip4Resp = "";
-var zip5Resp = "";
-var zip6Resp = "";
-var zip7Resp = "";
+var version = "2.5.0";
+var printer;
 checkUpdates();
 
 //Check for updates
@@ -85,39 +78,11 @@ function parseTide(response, name){
 	else{
 		responseMessage = "Sorry, could not retreive tides for this location";
 		}
-	if(name == "gps") {
-		gpsResp = responseMessage+"\n\n";
-	}
-	else if(name == "zip1"){
-		zip1Resp = responseMessage+"\n\n";
-	}
-	else if(name == "zip2"){
-		zip2Resp = responseMessage+"\n\n";
-	}
-	else if(name == "zip3"){
-		zip3Resp = responseMessage+"\n\n";
-	}
-	else if(name == "zip4"){
-		zip4Resp = responseMessage+"\n\n";
-	}
-	else if(name == "zip5"){
-		zip5Resp = responseMessage+"\n\n";
-	}
-	else if(name == "zip6"){
-		zip6Resp = responseMessage+"\n\n";
-	}
-	else if(name == "zip7"){
-		zip7Resp = responseMessage;
-	}
-	print();
-}
-
-//Print the tide data
-function print(){
-	simply.style("large");
-	simply.scrollable(true);
-	var responseMessage =  localStorage.updateLanguage + gpsResp + zip1Resp + zip2Resp + zip3Resp + zip4Resp + zip5Resp + zip6Resp + zip7Resp;
-	simply.body(responseMessage);
+//compile data to be written to screen and print it
+		printer = printer + responseMessage+"\n\n";
+		simply.style("large");
+		console.log(printer);
+		simply.body(printer);
 }
 
 //Actually get the tides and package it to send to parseTide
@@ -149,15 +114,8 @@ function runPos() {
 	if(localStorage.update == "true"){
 		localStorage.updateLanguage = "A new update was found, please remove the app from your watch and reinstall\n\n";}
 	else{localStorage.updateLanguage = "";}
-//clear variables
-	gpsResp = "";
-	zip1Resp = "";
-	zip2Resp = "";
-	zip3Resp = "";
-	zip4Resp = "";
-	zip5Resp = "";
-	zip6Resp = "";
-	zip7Resp = "";
+//clear variable
+	printer = "";
 //Choose which zips/gps to find tides for
 	if(localStorage.useGPS == "on"){
 		navigator.geolocation.getCurrentPosition(showPosition);
@@ -202,11 +160,12 @@ function setUp(options){
 //
 //Pebble Listeners
 //
-Pebble.addEventListener("showConfiguration", function() {
+Pebble.addEventListener("showConfiguration", function(e) {
+	console.log("showing config");
 	Pebble.openURL("http://mikedombrowski.com/pebbletides-config.html");
 });
 Pebble.addEventListener("webviewclosed", function(e) {  
-	console.log("configuration closed, webview");
+	console.log("configuration closed");
 	var options = JSON.parse(decodeURIComponent(e.response));
 	console.log("Options = " + JSON.stringify(options));
 	if(options.gps == "on" || options.gps == "off"){
