@@ -1,0 +1,99 @@
+
+<html>
+  <head>
+    <title>Configurable</title>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' href='http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.css' />
+    <script src='http://code.jquery.com/jquery-1.9.1.min.js'></script>
+    <script src='http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js'></script>
+  </head>
+  <body>
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-4436865-9', 'mikedombrowski.com');
+  ga('send', 'pageview');
+
+</script>
+    <div data-role="page" id="main">
+      <div data-role="header" class="jqm-header">
+        <h1>Configurable Pebble Tides App</h1>
+      </div>
+
+      <div data-role="content">
+
+        <div data-role="fieldcontain">
+          <label for="gps">Use GPS to Get Tides?</label>
+          <select name="gps" id="gps" data-role="slider">
+            <option value="off">Off</option>
+            <option value="on">On</option>
+          </select>
+        </div>
+
+        <div data-role="fieldcontain">
+          <fieldset data-role="controlgroup">
+            <legend>Enter up to 7 ZIP Codes or City and State Abbreviations</legend>
+            <label for="name">ZIP/Location 1:</label>
+			<input type="text" name="zip1" id="zip1"></input>
+			<label for="name">ZIP/Location 2:</label>
+			<input type="text" name="zip2" id="zip2"></input>
+			<label for="name">ZIP/Location 3:</label>
+			<input type="text" name="zip3" id="zip3"></input>
+			<label for="name">ZIP/Location 4:</label>
+			<input type="text" name="zip4" id="zip4"></input>
+			<label for="name">ZIP/Location 5:</label>
+			<input type="text" name="zip5" id="zip5"></input>
+			<label for="name">ZIP/Location 6:</label>
+			<input type="text" name="zip6" id="zip6"></input>
+			<label for="name">ZIP/Location 7:</label>
+			<input type="text" name="zip7" id="zip7"></input>
+            </fieldset>
+          </div>
+        </div>
+
+        <div class="ui-body ui-body-b">
+          <fieldset class="ui-grid-a">
+              <div class="ui-block-a"><button type="submit" data-theme="c" data-icon="delete" data-iconpos="left" id="cancel">Cancel</button></div>
+              <div class="ui-block-b"><button type="submit" data-theme="b" data-icon="check" data-iconpos="right" id="submit">Submit</button></div>
+            </fieldset>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      function saveOptions() {
+        var options = {
+          'gps': $("#gps").val(),
+		  'zip1': $("#zip1").val(),
+          'zip2': $("#zip2").val(),
+		  'zip3': $("#zip3").val(),
+		  'zip4': $("#zip4").val(),
+		  'zip5': $("#zip5").val(),
+		  'zip6': $("#zip6").val(),
+		  'zip7': $("#zip7").val()
+        }
+        return options;
+      }
+
+      $().ready(function() {
+        $("#cancel").click(function() {
+          console.log("Cancel");
+          document.location = "pebblejs://close";
+        });
+
+        $("#submit").click(function() {
+          console.log("Submit");
+          var location = "pebblejs://close#" + encodeURIComponent(JSON.stringify(saveOptions()));
+          console.log("Warping to: " + location);
+          console.log(location);
+          document.location = location;
+        });
+
+      });
+    </script>
+  </body>
+</html>
