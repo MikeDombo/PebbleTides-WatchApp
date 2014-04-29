@@ -1,3 +1,6 @@
+//Licensed under Creative Commons Attribution, Non-Commercial, Share-alike 4.0
+//http://creativecommons.org/licenses/by-nc-sa/4.0/
+
 //setup global variables
 var version = "2.5.1";
 var printer;
