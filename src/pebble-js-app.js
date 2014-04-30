@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 //setup global variables
-var version = "2.5.1";
+var version = "2.5.2";
 var printer;
 checkUpdates();
 
@@ -96,7 +96,6 @@ function parseTide(response, name){
 //compile data to be written to screen and print it
 		printer = printer + responseMessage+"\n\n";
 		simply.style("large");
-		console.log(printer);
 		simply.body(printer);
 }
 
@@ -173,7 +172,7 @@ function setUp(options){
 //Pebble Listeners
 //
 Pebble.addEventListener("showConfiguration", function(e) {
-	Pebble.openURL("http://mikedombrowski.com/pebbletides-config.html");
+	Pebble.openURL("http://mikedombrowski.com/pebbletides-config.html?"+localStorage.zip1+"&"+localStorage.zip2+"&"+localStorage.zip3+"&"+localStorage.zip4+"&"+localStorage.zip5+"&"+localStorage.zip6+"&"+localStorage.zip7);
 });
 Pebble.addEventListener("webviewclosed", function(e) {
 	var options = JSON.parse(decodeURIComponent(e.response));
