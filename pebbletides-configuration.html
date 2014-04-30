@@ -1,6 +1,7 @@
 <!--Copyright 2014 Michael Dombrowski
 Licensed under GNU General Public License version 2 (GPLv2)-->
 
+
 <html>
   <head>
     <title>Configurable</title>
@@ -68,6 +69,14 @@ Licensed under GNU General Public License version 2 (GPLv2)-->
     </div>
     <script>
       function saveOptions() {
+    var options = location.search.slice(1).split("&");
+	$("#zip1").val(options[0]);
+	$("#zip2").val(options[1]);
+	$("#zip3").val(options[2]);
+	$("#zip4").val(options[3]);
+	$("#zip5").val(options[4]);
+	$("#zip6").val(options[5]);
+	$("#zip7").val(options[6]);
         var options = {
           'gps': $("#gps").val(),
 		  'zip1': $("#zip1").val(),
