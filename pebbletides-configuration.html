@@ -68,8 +68,14 @@ Licensed under GNU General Public License version 2 (GPLv2)-->
       </div>
     </div>
     <script>
-      function saveOptions() {
     var options = location.search.slice(1).split("&");
+	options[0] = options[0].split("=")[1];
+	options[1] = options[1].split("=")[1];
+	options[2] = options[2].split("=")[1];
+	options[3] = options[3].split("=")[1];
+	options[4] = options[4].split("=")[1];
+	options[5] = options[5].split("=")[1];
+	options[6] = options[6].split("=")[1];
 	$("#zip1").val(options[0]);
 	$("#zip2").val(options[1]);
 	$("#zip3").val(options[2]);
@@ -77,6 +83,7 @@ Licensed under GNU General Public License version 2 (GPLv2)-->
 	$("#zip5").val(options[4]);
 	$("#zip6").val(options[5]);
 	$("#zip7").val(options[6]);
+      function saveOptions() {
         var options = {
           'gps': $("#gps").val(),
 		  'zip1': $("#zip1").val(),
