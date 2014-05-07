@@ -14,9 +14,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 //setup global variables
-var version = "2.5.2";
+var version = "2.5.4";
 var printer;
-checkUpdates();
+if(localStorage.iPhone !== null && localStorage.iPhone === false){
+	checkUpdates();
+}
 
 //Check for updates
 function checkUpdates(){
@@ -165,6 +167,7 @@ function setUp(options){
 	localStorage.zip5 = options.zip5;
 	localStorage.zip6 = options.zip6;
 	localStorage.zip7 = options.zip7;
+	localStorage.iPhone = options.iPhone;
 	mainPage();
 }
 
@@ -172,7 +175,7 @@ function setUp(options){
 //Pebble Listeners
 //
 Pebble.addEventListener("showConfiguration", function(e) {
-	Pebble.openURL("http://mikedombrowski.com/pebbletides-config.html?"+localStorage.zip1+"&"+localStorage.zip2+"&"+localStorage.zip3+"&"+localStorage.zip4+"&"+localStorage.zip5+"&"+localStorage.zip6+"&"+localStorage.zip7);
+	Pebble.openURL("http://mikedombrowski.com/pebbletides-config.html?loc1="+localStorage.zip1+"&loc2="+localStorage.zip2+"&loc3="+localStorage.zip3+"&loc4="+localStorage.zip4+"&loc5="+localStorage.zip5+"&loc6="+localStorage.zip6+"&loc7="+localStorage.zip7);
 });
 Pebble.addEventListener("webviewclosed", function(e) {
 	var options = JSON.parse(decodeURIComponent(e.response));
