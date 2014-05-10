@@ -68,6 +68,10 @@ Licensed under GNU General Public License version 2 (GPLv2)-->
       </div>
     </div>
     <script>
+	var iPhon = false;
+	if(/iP([ao]d|hone)/.test(navigator.userAgent)){
+	iPhon=true;
+	}
     var options = location.search.slice(1).split("&");
 	options[0] = options[0].split("=")[1];
 	options[1] = options[1].split("=")[1];
@@ -76,6 +80,11 @@ Licensed under GNU General Public License version 2 (GPLv2)-->
 	options[4] = options[4].split("=")[1];
 	options[5] = options[5].split("=")[1];
 	options[6] = options[6].split("=")[1];
+	for(loc in options){
+		if(options[loc]===null || options[loc]=="undefined" || options[loc] == "null"){
+		options[loc]="";
+		}
+	}
 	$("#zip1").val(options[0]);
 	$("#zip2").val(options[1]);
 	$("#zip3").val(options[2]);
@@ -92,7 +101,8 @@ Licensed under GNU General Public License version 2 (GPLv2)-->
 		  'zip4': $("#zip4").val(),
 		  'zip5': $("#zip5").val(),
 		  'zip6': $("#zip6").val(),
-		  'zip7': $("#zip7").val()
+		  'zip7': $("#zip7").val(),
+		  'iPhone' : iPhon
         }
         return options;
       }
