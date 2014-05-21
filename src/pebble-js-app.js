@@ -14,11 +14,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 //setup global variables
-var version = "2.5.4";
-var printer;
-if(localStorage.iPhone !== null && localStorage.iPhone === false){
-	checkUpdates();
-}
+var version = "2.6.0";
+var currentConfigText = 'Current Configuration:\nGPS is '+localStorage.useGPS+'\nZip 1: '+localStorage.zip1+'\nZip 2: '+localStorage.zip2+'\nZip 3: '+localStorage.zip3+'\nZip 4: '+localStorage.zip4+'\nZip 5: '+localStorage.zip5+'\nZip 6: '+localStorage.zip6+'\nZip 7: '+localStorage.zip7;
+checkUpdates();
 
 //Check for updates
 function checkUpdates(){
@@ -29,16 +27,16 @@ function checkUpdates(){
 		if(response!==null && req.status == 200){
 			var current = version.split(".");
 			console.log("web version "+response.substring(9,10)+"."+response.substring(19,20)+"."+response.substring(30,31)+" current version"+current[0]+"."+current[1]+"."+current[2]);
+			localStorage.update = "false";
 			if(response.substring(9,10)>current[0]){
 				localStorage.update = "true";
 			}
-			else if(response.substring(19,20)>current[1]){
+			else if(response.substring(19,20)>current[1] && !(response.substring(9,10)<current[0])){
 				localStorage.update = "true";
 			}
-			else if(response.substring(30,31)>current[2]){
+			else if(response.substring(30,31)>current[2] && !(response.substring(9,10)<current[0]) && !(response.substring(19,20)<current[1])){
 				localStorage.update =  "true";
 			}
-			else{localStorage.update = "false";}
 		}};
   req.open('GET', "http://mikedombrowski.com/pbtides-version");
   req.send(null);
@@ -58,6 +56,11 @@ function parseTide(response, name){
 		tideTime = response.response[0].periods[0].timestamp;
 		city = ((response.response[0].place.name).substring(0,1)).toUpperCase()+(response.response[0].place.name).substring(1);
 		state = (response.response[0].place.state).toUpperCase();
+		var time = response.response[0].periods[0].dateTimeISO.substring(11,16);
+		if(localStorage.hourFormat == "12h" && parseInt(time.substring(0,2))>12){
+			time = (parseInt(time.substring(0,2))-12)+time.substring(2);
+		}
+		console.log(time);
 		var diffTime = tideTime - currTime;
 		var tide;
 		var tideTimemin = ((diffTime)/60);
@@ -81,14 +84,14 @@ function parseTide(response, name){
 //Put together responseMessage
 		if(Math.abs(tideTimemin)>=60) {
 			if (tideTimemin%60 == "0") {
-				responseMessage = tide + timePassed[0] + Math.abs(tideTimehr) + hour + timePassed[1];
+				responseMessage = tide + timePassed[0] + Math.abs(tideTimehr) + hour + timePassed[1]+" ("+time+")";
 				}
 			else {
-				responseMessage = tide + timePassed[0] + Math.abs(tideTimehr) + hour + " and " + Math.round(Math.abs(tideTimemin%60)) + minute + timePassed[1];
+				responseMessage = tide + timePassed[0] + Math.abs(tideTimehr) + hour + " and " + Math.round(Math.abs(tideTimemin%60)) + minute + timePassed[1]+" ("+time+")";
 				}
 			}
 		else{
-			responseMessage = tide + timePassed[0] + Math.round(Math.abs(tideTimemin)) + minute + timePassed[1];
+			responseMessage = tide + timePassed[0] + Math.round(Math.abs(tideTimemin)) + minute + timePassed[1]+" ("+time+")";
 			}
 		responseMessage = responseMessage + " in " + city + ", " + state;
 		}
@@ -96,9 +99,9 @@ function parseTide(response, name){
 		responseMessage = "Sorry, could not retreive tides for this location";
 		}
 //compile data to be written to screen and print it
-		printer = printer + responseMessage+"\n\n";
+		localStorage.printer = localStorage.printer + responseMessage+"\n\n";
 		simply.style("large");
-		simply.body(printer);
+		simply.body(localStorage.printer);
 }
 
 //Actually get the tides and package it to send to parseTide
@@ -126,9 +129,9 @@ function showPosition(position) {
 
 //Run it
 function runPos() {
-	if(localStorage.update == "true"){
-		printer = "A new update was found, please unload the app from your watch and reload\n\n";}
-	else{printer = "";}
+	if(localStorage.update == "true" && (localStorage.printer === null || localStorage.printer == "")){
+		localStorage.printer = "A new update was found, please unload the app from your watch and reload\n\n";}
+	else{localStorage.printer = "";}
 //Choose which zips/gps to find tides for
 	if(localStorage.useGPS == "on"){
 		navigator.geolocation.getCurrentPosition(showPosition);
@@ -167,15 +170,18 @@ function setUp(options){
 	localStorage.zip5 = options.zip5;
 	localStorage.zip6 = options.zip6;
 	localStorage.zip7 = options.zip7;
-	localStorage.iPhone = options.iPhone;
-	mainPage();
+	localStorage.configText = options.configText;
+	localStorage.hourFormat = options.hourFormat;
+	if(localStorage.configText=="on")
+	{mainPage(currentConfigText+"\n\n");}
+	else{mainPage("");}
 }
 
 //
 //Pebble Listeners
 //
 Pebble.addEventListener("showConfiguration", function(e) {
-	Pebble.openURL("http://mikedombrowski.com/pebbletides-config.html?loc1="+localStorage.zip1+"&loc2="+localStorage.zip2+"&loc3="+localStorage.zip3+"&loc4="+localStorage.zip4+"&loc5="+localStorage.zip5+"&loc6="+localStorage.zip6+"&loc7="+localStorage.zip7);
+	Pebble.openURL("http://mikedombrowski.com/pebbletides-config.html?loc1="+localStorage.zip1+"&loc2="+localStorage.zip2+"&loc3="+localStorage.zip3+"&loc4="+localStorage.zip4+"&loc5="+localStorage.zip5+"&loc6="+localStorage.zip6+"&loc7="+localStorage.zip7+"&gps="+localStorage.useGPS+"&configText="+localStorage.configText+"&hourFormat="+localStorage.hourFormat);
 });
 Pebble.addEventListener("webviewclosed", function(e) {
 	var options = JSON.parse(decodeURIComponent(e.response));
@@ -192,12 +198,14 @@ simply.on('singleClick', function(e) {
 	if(e.button == "select"){
 		runPos();}
 });
-mainPage();
-function mainPage(){
+if(localStorage.configText=="on")
+{mainPage(currentConfigText+"\n\n");}
+else{mainPage("");}
+
+function mainPage(configText){
 	simply.scrollable(true);
 	simply.style("small");
 	simply.setText({
 		title: 'Pebble Tides',
-		body: 'Press \'Select\' to Get Tides.\n\nCurrent Configuration:\nGPS is '+localStorage.useGPS+'\nZip 1: '+localStorage.zip1+'\nZip 2: '+localStorage.zip2+'\nZip 3: '+localStorage.zip3+'\nZip 4: '+localStorage.zip4+'\nZip 5: '+localStorage.zip5+'\nZip 6: '+localStorage.zip6+'\nZip 7: '+localStorage.zip7+
-		'\n\nBy Michael Dombrowski\nMikeDombrowski.com\n\nVersion '+version,}, true);
+		 body: 'Press \'Select\' to Get Tides.\n\n'+configText+'By Michael Dombrowski\nMikeDombrowski.com\n\nVersion '+version+'\n\n'+localStorage.printer,}, true);
 }
