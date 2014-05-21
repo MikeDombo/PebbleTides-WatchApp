@@ -1,7 +1,6 @@
 <!--Copyright 2014 Michael Dombrowski
 Licensed under GNU General Public License version 2 (GPLv2)-->
 
-
 <html>
   <head>
     <title>Configurable</title>
@@ -34,6 +33,16 @@ Licensed under GNU General Public License version 2 (GPLv2)-->
           <select name="gps" id="gps" data-role="slider">
             <option value="off">Off</option>
             <option value="on">On</option>
+          </select>
+		  <label for="configText">Show the Current Configuration on the App?</label>
+          <select name="configText" id="configText" data-role="slider">
+            <option value="off">Off</option>
+            <option value="on">On</option>
+          </select>
+		  <label for="hourFormat">What Time Format Do You Prefer?</label>
+          <select name="hourFormat" id="hourFormat" data-role="slider">
+            <option value="12h">12h</option>
+            <option value="24h">24h</option>
           </select>
         </div>
 
@@ -68,10 +77,6 @@ Licensed under GNU General Public License version 2 (GPLv2)-->
       </div>
     </div>
     <script>
-	var iPhon = false;
-	if(/iP([ao]d|hone)/.test(navigator.userAgent)){
-	iPhon=true;
-	}
     var options = location.search.slice(1).split("&");
 	options[0] = options[0].split("=")[1];
 	options[1] = options[1].split("=")[1];
@@ -80,6 +85,9 @@ Licensed under GNU General Public License version 2 (GPLv2)-->
 	options[4] = options[4].split("=")[1];
 	options[5] = options[5].split("=")[1];
 	options[6] = options[6].split("=")[1];
+	options[7] = options[7].split("=")[1];
+	options[8] = options[8].split("=")[1];
+	options[9] = options[9].split("=")[1];
 	for(loc in options){
 		if(options[loc]===null || options[loc]=="undefined" || options[loc] == "null"){
 		options[loc]="";
@@ -92,6 +100,9 @@ Licensed under GNU General Public License version 2 (GPLv2)-->
 	$("#zip5").val(options[4]);
 	$("#zip6").val(options[5]);
 	$("#zip7").val(options[6]);
+	$("#gps").val(options[7]);
+	$("#configText").val(options[8]);
+	$("#hourFormat").val(options[9]);
       function saveOptions() {
         var options = {
           'gps': $("#gps").val(),
@@ -102,7 +113,8 @@ Licensed under GNU General Public License version 2 (GPLv2)-->
 		  'zip5': $("#zip5").val(),
 		  'zip6': $("#zip6").val(),
 		  'zip7': $("#zip7").val(),
-		  'iPhone' : iPhon
+		  'configText': $("#configText").val(),
+		  'hourFormat': $("#hourFormat").val()
         }
         return options;
       }
