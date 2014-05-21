@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 //setup global variables
-var version = "2.6.0";
+var version = "2.6.2";
 var currentConfigText = 'Current Configuration:\nGPS is '+localStorage.useGPS+'\nZip 1: '+localStorage.zip1+'\nZip 2: '+localStorage.zip2+'\nZip 3: '+localStorage.zip3+'\nZip 4: '+localStorage.zip4+'\nZip 5: '+localStorage.zip5+'\nZip 6: '+localStorage.zip6+'\nZip 7: '+localStorage.zip7;
 checkUpdates();
 
@@ -26,17 +26,17 @@ function checkUpdates(){
        response = req.responseText;
 		if(response!==null && req.status == 200){
 			var current = version.split(".");
-			console.log("web version "+response.substring(9,10)+"."+response.substring(19,20)+"."+response.substring(30,31)+" current version"+current[0]+"."+current[1]+"."+current[2]);
 			localStorage.update = "false";
 			if(response.substring(9,10)>current[0]){
 				localStorage.update = "true";
 			}
-			else if(response.substring(19,20)>current[1] && !(response.substring(9,10)<current[0])){
+			else if(response.substring(19,20)>current[1] && response.substring(9,10)==current[0]){
 				localStorage.update = "true";
 			}
-			else if(response.substring(30,31)>current[2] && !(response.substring(9,10)<current[0]) && !(response.substring(19,20)<current[1])){
+			else if(response.substring(30,31)>current[2] && response.substring(9,10)==current[0] && response.substring(19,20)==current[1]){
 				localStorage.update =  "true";
 			}
+			console.log(localStorage.update);
 		}};
   req.open('GET', "http://mikedombrowski.com/pbtides-version");
   req.send(null);
@@ -58,9 +58,8 @@ function parseTide(response, name){
 		state = (response.response[0].place.state).toUpperCase();
 		var time = response.response[0].periods[0].dateTimeISO.substring(11,16);
 		if(localStorage.hourFormat == "12h" && parseInt(time.substring(0,2))>12){
-			time = (parseInt(time.substring(0,2))-12)+time.substring(2);
+			time = (parseInt(time.substring(0,2))-12)+time.substring(2)+"PM";
 		}
-		console.log(time);
 		var diffTime = tideTime - currTime;
 		var tide;
 		var tideTimemin = ((diffTime)/60);
@@ -129,7 +128,7 @@ function showPosition(position) {
 
 //Run it
 function runPos() {
-	if(localStorage.update == "true" && (localStorage.printer === null || localStorage.printer == "")){
+	if(localStorage.update == "true"){
 		localStorage.printer = "A new update was found, please unload the app from your watch and reload\n\n";}
 	else{localStorage.printer = "";}
 //Choose which zips/gps to find tides for
