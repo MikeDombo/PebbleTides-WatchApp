@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 //setup global variables
-var version = "2.6.2";
+var version = "2.6.4";
 var currentConfigText = 'Current Configuration:\nGPS is '+localStorage.useGPS+'\nZip 1: '+localStorage.zip1+'\nZip 2: '+localStorage.zip2+'\nZip 3: '+localStorage.zip3+'\nZip 4: '+localStorage.zip4+'\nZip 5: '+localStorage.zip5+'\nZip 6: '+localStorage.zip6+'\nZip 7: '+localStorage.zip7;
 checkUpdates();
 
@@ -36,7 +36,10 @@ function checkUpdates(){
 			else if(response.substring(30,31)>current[2] && response.substring(9,10)==current[0] && response.substring(19,20)==current[1]){
 				localStorage.update =  "true";
 			}
-			console.log(localStorage.update);
+			else {
+				localStorage.update = "false";
+			}
+			console.log("update is "+localStorage.update);
 		}};
   req.open('GET', "http://mikedombrowski.com/pbtides-version");
   req.send(null);
@@ -105,7 +108,7 @@ function parseTide(response, name){
 
 //Actually get the tides and package it to send to parseTide
 function getTides(zip, name) {
-	zip = zip.replace(/\s+/g, "%20");
+	zip = encodeURIComponent(zip);
 	console.log("called getTides using: "+zip);
 	var response;
 	var req = new XMLHttpRequest();
@@ -180,7 +183,7 @@ function setUp(options){
 //Pebble Listeners
 //
 Pebble.addEventListener("showConfiguration", function(e) {
-	Pebble.openURL("http://mikedombrowski.com/pebbletides-config.html?loc1="+localStorage.zip1+"&loc2="+localStorage.zip2+"&loc3="+localStorage.zip3+"&loc4="+localStorage.zip4+"&loc5="+localStorage.zip5+"&loc6="+localStorage.zip6+"&loc7="+localStorage.zip7+"&gps="+localStorage.useGPS+"&configText="+localStorage.configText+"&hourFormat="+localStorage.hourFormat);
+	Pebble.openURL("http://mikedombrowski.com/pebbletides-config.html?loc1="+encodeURIComponent(localStorage.zip1)+"&loc2="+encodeURIComponent(localStorage.zip2)+"&loc3="+encodeURIComponent(localStorage.zip3)+"&loc4="+encodeURIComponent(localStorage.zip4)+"&loc5="+encodeURIComponent(localStorage.zip5)+"&loc6="+encodeURIComponent(localStorage.zip6)+"&loc7="+encodeURIComponent(localStorage.zip7)+"&gps="+localStorage.useGPS+"&configText="+localStorage.configText+"&hourFormat="+localStorage.hourFormat);
 });
 Pebble.addEventListener("webviewclosed", function(e) {
 	var options = JSON.parse(decodeURIComponent(e.response));
@@ -206,5 +209,5 @@ function mainPage(configText){
 	simply.style("small");
 	simply.setText({
 		title: 'Pebble Tides',
-		 body: 'Press \'Select\' to Get Tides.\n\n'+configText+'By Michael Dombrowski\nMikeDombrowski.com\n\nVersion '+version+'\n\n'+localStorage.printer,}, true);
+		body: 'Press \'Select\' to Get Tides.\n\n'+configText+'By Michael Dombrowski\nMikeDombrowski.com\n\nVersion '+version+'\n\n'+localStorage.printer,}, true);
 }
