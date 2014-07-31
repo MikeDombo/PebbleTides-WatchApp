@@ -1,0 +1,37 @@
+{
+    "appKeys": {},
+    "capabilities": [
+        "location",
+        "configurable"
+    ],
+    "companyName": "Mike Dombrowski",
+    "longName": "Tide Aware",
+    "projectType": "simplyjs",
+    "resources": {
+        "media": [
+            {
+                "file": "images/menu_icon.png",
+                "menuIcon": true,
+                "name": "IMAGE_MENU_ICON",
+                "type": "png"
+            },
+            {
+                "file": "images/logo_splash.png",
+                "name": "IMAGE_LOGO_SPLASH",
+                "type": "png"
+            },
+            {
+                "file": "fonts/UbuntuMono-Regular.ttf",
+                "name": "MONO_FONT_14",
+                "type": "font"
+            }
+        ]
+    },
+    "shortName": "Tide Aware",
+    "uuid": "7c9fbbd9-2a8b-4198-bf1b-fd786e0337d0",
+    "versionCode": 16,
+    "versionLabel": "2.6.5",
+    "watchapp": {
+        "watchface": false
+    }
+}

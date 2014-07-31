@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
 
 //setup global variables
-var version = "2.6.4";
+var version = "2.6.5";
 var currentConfigText = 'Current Configuration:\nGPS is '+localStorage.useGPS+'\nZip 1: '+localStorage.zip1+'\nZip 2: '+localStorage.zip2+'\nZip 3: '+localStorage.zip3+'\nZip 4: '+localStorage.zip4+'\nZip 5: '+localStorage.zip5+'\nZip 6: '+localStorage.zip6+'\nZip 7: '+localStorage.zip7;
 checkUpdates();
 
@@ -208,6 +208,6 @@ function mainPage(configText){
 	simply.scrollable(true);
 	simply.style("small");
 	simply.setText({
-		title: 'Pebble Tides',
+		title: 'Tide Aware',
 		body: 'Press \'Select\' to Get Tides.\n\n'+configText+'By Michael Dombrowski\nMikeDombrowski.com\n\nVersion '+version+'\n\n'+localStorage.printer,}, true);
 }
