@@ -1,6 +1,5 @@
 <!--Copyright 2014 Michael Dombrowski
 Licensed under GNU General Public License version 2 (GPLv2)-->
-
 <html>
   <head>
     <title>Configurable</title>
@@ -23,22 +22,12 @@ Licensed under GNU General Public License version 2 (GPLv2)-->
 </script>
     <div data-role="page" id="main">
       <div data-role="header" class="jqm-header">
-        <h1>Configurable Pebble Tides App</h1>
+        <h1>Tide Aware Configuration</h1>
       </div>
 
       <div data-role="content">
 
         <div data-role="fieldcontain">
-          <label for="gps">Use GPS to Get Tides?</label>
-          <select name="gps" id="gps" data-role="slider">
-            <option value="off">Off</option>
-            <option value="on">On</option>
-          </select>
-		  <label for="configText">Show the Current Configuration on the App?</label>
-          <select name="configText" id="configText" data-role="slider">
-            <option value="off">Off</option>
-            <option value="on">On</option>
-          </select>
 		  <label for="hourFormat">What Time Format Do You Prefer?</label>
           <select name="hourFormat" id="hourFormat" data-role="slider">
             <option value="12h">12h</option>
@@ -77,48 +66,26 @@ Licensed under GNU General Public License version 2 (GPLv2)-->
       </div>
     </div>
     <script>
-    var options = location.search.slice(1).split("&");
-	options[0] = options[0].split("=")[1];
-	options[1] = options[1].split("=")[1];
-	options[2] = options[2].split("=")[1];
-	options[3] = options[3].split("=")[1];
-	options[4] = options[4].split("=")[1];
-	options[5] = options[5].split("=")[1];
-	options[6] = options[6].split("=")[1];
-	options[7] = options[7].split("=")[1];
-	options[8] = options[8].split("=")[1];
-	options[9] = options[9].split("=")[1];
-	for(loc in options){
-		if(options[loc]===null || options[loc]=="undefined" || options[loc] == "null"){
-		options[loc]="";
+	var locations = {};
+    var options = location.search.substring(6);
+	options = JSON.parse(decodeURIComponent(options));
+	$("#hourFormat").val(options.hourFormat);
+	for(var i=1; i<8; i++){
+		if(typeof options["location"+i] != "undefined"){
+			$("#zip"+i).val(options['location'+i].displayName);
+			locations['location'+i] = {displayName: options['location'+i].displayName, lookupName: options['location'+i].lookupName};
 		}
+		else {locations['location'+i] = {displayName: "", lookupName: ""};}
 	}
-	$("#zip1").val(options[0]);
-	$("#zip2").val(options[1]);
-	$("#zip3").val(options[2]);
-	$("#zip4").val(options[3]);
-	$("#zip5").val(options[4]);
-	$("#zip6").val(options[5]);
-	$("#zip7").val(options[6]);
-	$("#gps").val(options[7]);
-	$("#configText").val(options[8]);
-	$("#hourFormat").val(options[9]);
-      function saveOptions() {
-        var options = {
-          'gps': $("#gps").val(),
-		  'zip1': $("#zip1").val(),
-          'zip2': $("#zip2").val(),
-		  'zip3': $("#zip3").val(),
-		  'zip4': $("#zip4").val(),
-		  'zip5': $("#zip5").val(),
-		  'zip6': $("#zip6").val(),
-		  'zip7': $("#zip7").val(),
-		  'configText': $("#configText").val(),
-		  'hourFormat': $("#hourFormat").val()
-        }
-        return options;
-      }
-
+	locations['hourFormat'] = options.hourFormat;
+	
+	function save(){
+	for(var i=1; i<8; i++){
+		locations["location"+i].displayName = $("#zip"+i).val();
+		locations["location"+i].lookupName = $("#zip"+i).val();
+	}
+	locations['hourFormat'] = $("#hourFormat").val();
+	}
       $().ready(function() {
         $("#cancel").click(function() {
           console.log("Cancel");
@@ -127,9 +94,10 @@ Licensed under GNU General Public License version 2 (GPLv2)-->
 
         $("#submit").click(function() {
           console.log("Submit");
-          var location = "pebblejs://close#" + encodeURIComponent(JSON.stringify(saveOptions()));
+		  save();
+          var location = "pebblejs://close#" + encodeURIComponent(JSON.stringify(locations));
           console.log("Warping to: " + location);
-          console.log(location);
+          console.log(locations);
           document.location = location;
         });
 
