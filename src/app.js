@@ -1,51 +1,50 @@
-//Copyright 2014 Michael Dombrowski 
-//Licensed under GNU General Public License, version 2 (GPL-2.0)
-/* Pebble Tides is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    Pebble Tides is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.*/
-
-//setup global variables
-var version = "2.6.5";
-var currentConfigText = 'Current Configuration:\nGPS is '+localStorage.useGPS+'\nZip 1: '+localStorage.zip1+'\nZip 2: '+localStorage.zip2+'\nZip 3: '+localStorage.zip3+'\nZip 4: '+localStorage.zip4+'\nZip 5: '+localStorage.zip5+'\nZip 6: '+localStorage.zip6+'\nZip 7: '+localStorage.zip7;
-checkUpdates();
-
-//Check for updates
-function checkUpdates(){
-	var response;
-	var req = new XMLHttpRequest();
-	req.onload = function(e) {
-       response = req.responseText;
-		if(response!==null && req.status == 200){
-			var current = version.split(".");
-			localStorage.update = "false";
-			if(response.substring(9,10)>current[0]){
-				localStorage.update = "true";
-			}
-			else if(response.substring(19,20)>current[1] && response.substring(9,10)==current[0]){
-				localStorage.update = "true";
-			}
-			else if(response.substring(30,31)>current[2] && response.substring(9,10)==current[0] && response.substring(19,20)==current[1]){
-				localStorage.update =  "true";
-			}
-			else {
-				localStorage.update = "false";
-			}
-			console.log("update is "+localStorage.update);
-		}};
-  req.open('GET', "http://mikedombrowski.com/pbtides-version");
-  req.send(null);
+var UI = require('ui');
+var ajax = require('ajax');
+var Vector2 = require('vector2');
+var Settings = require('settings');
+var version = '3.3';
+var window = new UI.Window({background: 'black'});
+		var text = new UI.Text({
+		position: new Vector2(0, 30),
+		size: new Vector2(144, 40),
+		text:'Downloading data...',
+		font:'GOTHIC_28_BOLD',
+		color:'white',
+		textOverflow:'wrap',
+		textAlign:'center'
+		});
+		window.add(text);
+var menu;
+var allTideData;
+if(typeof localStorage.allTideData !== "undefined" && localStorage.allTideData !== null && localStorage.allTideData !== ""){allTideData = JSON.parse(localStorage.allTideData);}
+if(typeof allTideData === "undefined"){allTideData = {location1:{displayName:"", lookupName:""}, location2:{displayName:"", lookupName:""}, location3:{displayName:"", lookupName:""}, location4:{displayName:"", lookupName:""}, location5:{displayName:"", lookupName:""}, location6:{displayName:"", lookupName:""}, location7:{displayName:"", lookupName:""}, hourFormat: "12h", units: "Ft"};
+				localStorage.allTideData = JSON.stringify(allTideData);}
+console.log(localStorage.allTideData);
+if(allTideData.units === null || typeof allTideData.units === "undefined"){allTideData.units = "Ft";}
+function splash(mode){
+	if(mode == "show") {
+		window.show();
+	}
+	else if(mode == "hide") {
+		window.hide();
+	}
+}
+function updateCheck(){
+	ajax(
+  {
+	url: 'http://mikedombrowski.com/pebtides/version/'+version+'/new.txt'
+  },
+  function(data) {
+	console.log('New Version Found! Version: '+data);
+	localStorage.update = 'true';
+  },
+  function(error) {
+    console.log('No New Update!');
+	localStorage.update = 'false';
+  });
 }
 
-//Parse tide data 
+updateCheck();
 function parseTide(response, name){
 //setup Vars
 	var responseMessage;	
@@ -53,14 +52,25 @@ function parseTide(response, name){
 	var tideTime;
 	var city;
 	var state;
+	var tideHeightFt;
+	var tideHeightM;
+	var tideHeight;
 	var currTime = Math.round(Date.now()/1000);
 	if (response.success === true && response.error === null) {
 		tideLevel = response.response[0].periods[0].type;
+		tideHeightFt = response.response[0].periods[0].heightFT;
+		tideHeightM = response.response[0].periods[0].heightM;
+		if(allTideData.units == "M"){
+			tideHeight = tideHeightM+" meters";
+		}
+		else{
+			tideHeight = tideHeightFt+" feet";
+		}
 		tideTime = response.response[0].periods[0].timestamp;
 		city = ((response.response[0].place.name).substring(0,1)).toUpperCase()+(response.response[0].place.name).substring(1);
 		state = (response.response[0].place.state).toUpperCase();
 		var time = response.response[0].periods[0].dateTimeISO.substring(11,16);
-		if(localStorage.hourFormat == "12h" && parseInt(time.substring(0,2))>12){
+		if(allTideData.hourFormat == "12h" && parseInt(time.substring(0,2))>12){
 			time = (parseInt(time.substring(0,2))-12)+time.substring(2)+"PM";
 		}
 		var diffTime = tideTime - currTime;
@@ -95,32 +105,36 @@ function parseTide(response, name){
 		else{
 			responseMessage = tide + timePassed[0] + Math.round(Math.abs(tideTimemin)) + minute + timePassed[1]+" ("+time+")";
 			}
-		responseMessage = responseMessage + " in " + city + ", " + state;
+		responseMessage = responseMessage + ". Height will be " + tideHeight + ", in " + city + ", " + state;
 		}
 	else{
 		responseMessage = "Sorry, could not retreive tides for this location";
 		}
 //compile data to be written to screen and print it
-		localStorage.printer = localStorage.printer + responseMessage+"\n\n";
-		simply.style("large");
-		simply.body(localStorage.printer);
+	splash("hide");
+	var resultCard = new UI.Card({title: "Tide Aware Result", body:responseMessage, scrollable: true});
+	resultCard.show();
 }
 
 //Actually get the tides and package it to send to parseTide
 function getTides(zip, name) {
 	zip = encodeURIComponent(zip);
 	console.log("called getTides using: "+zip);
-	var response;
-	var req = new XMLHttpRequest();
-	req.onload = function(e) {
-       console.log(req.responseText);
-       response = JSON.parse(req.responseText);
-		if(response!==null && req.status == 200){
-			parseTide(response, name);
-		}};
-  req.open('GET', "http://api.aerisapi.com/tides/closest?p=" + zip + "&client_id=eOQzJRTGPtPKdfokmpGQ9&client_secret=Elmx32lruftjejQDJWmyAgd1FMEp98LHHk9aVasg&radius=1000mi&from=-8hours&plimit=2&psort=dt");
-  req.send(null);
-}
+	ajax(
+  {
+    url: 'http://api.aerisapi.com/tides/closest?p='+zip+'&client_id=eOQzJRTGPtPKdfokmpGQ9&client_secret=Elmx32lruftjejQDJWmyAgd1FMEp98LHHk9aVasg&radius=1000mi&from=-8hours&plimit=2&psort=dt',
+    type: 'json'
+  },
+  function(data) {
+    // Success!
+    console.log('success'+JSON.stringify(data));
+	parseTide(data, name);
+  },
+  function(error) {
+    // Failure!
+    console.log('Failed fetching data: ' + error);
+  }
+  );}
 
 //Use GPS to get tides
 function showPosition(position) {
@@ -128,86 +142,107 @@ function showPosition(position) {
 	var lng = position.coords.longitude;
 	getTides(lat+","+lng, "gps");
     }
-
-//Run it
-function runPos() {
-	if(localStorage.update == "true"){
-		localStorage.printer = "A new update was found, please unload the app from your watch and reload\n\n";}
-	else{localStorage.printer = "";}
-//Choose which zips/gps to find tides for
-	if(localStorage.useGPS == "on"){
-		navigator.geolocation.getCurrentPosition(showPosition);
+function makeMenu(){
+	var locations = [];
+	if(localStorage.update == 'true'){locations.push({
+      title:'New Update Available',
+      subtitle:''
+	});}
+	locations.push({
+      title:'GPS Location',
+      subtitle:''
+    });
+	var x = 1;
+	for(var i=1; i<8; i++){
+		var title = "Location "+x;
+		if(typeof allTideData['location'+i] != "undefined"){
+			var subtitle = allTideData['location'+i].lookupName;
+			if (subtitle === ''){
+			continue;
+			}
+		else{
+			locations.push({
+			title:title,
+			subtitle:subtitle
+			});
+			x++;
+		}
+		}
 	}
-	if(localStorage.zip1 !== "" && localStorage.zip1 !== null){
-		getTides(localStorage.zip1, "zip1");
+	locations.push({
+			title:'About',
+			subtitle:'About This App'
+			});
+	locations.push({
+			title:'Settings',
+			subtitle:'Change App Settings'
+			});
+	menu = new UI.Menu({
+   sections: [{
+		title: 'Tide Locations',
+		items: locations
+    }]
+  });
+	menu.on('select', function(e){
+	if(e.itemIndex > 0 ){
+		if (locations[e.itemIndex].title == 'About'){
+			var card = new UI.Card();
+			card.title('Tide Aware');
+			card.scrollable(true);
+			card.body('By Michael Dombrowski\nMikeDombrowski.com\n\nVersion '+version);
+			card.show();
+		}
+		else if (locations[e.itemIndex].title == 'Settings'){
+			var settMenu = new UI.Menu({
+		sections: [{
+			title: 'App Settings',
+			items: [{title:'Current ('+allTideData.hourFormat+')',subtitle:'12 or 24 Hour Time'},
+					{title:'Current ('+allTideData.units+')',subtitle:'Tide Height Units (Ft/M)'}]
+		}]
+		});
+			settMenu.on('select', function(e){
+				if(e.itemIndex===0){
+				if (allTideData.hourFormat == '12h'){allTideData.hourFormat = '24h';}
+				else {allTideData.hourFormat = '12h';}
+				settMenu.items(0,[{title:'Current ('+allTideData.hourFormat+')', subtitle:'12 or 24 Hour Time'}, {title:'Current ('+allTideData.units+')',subtitle:'Tide Height Units (Ft/M)'}]);}
+				else{
+					if (allTideData.units == 'M'){allTideData.units = 'Ft';}
+					else {allTideData.units = 'M';}
+					settMenu.items(0,[{title:'Current ('+allTideData.hourFormat+')', subtitle:'12 or 24 Hour Time'}, {title:'Current ('+allTideData.units+')',subtitle:'Tide Height Units (Ft/M)'}]);
+				}
+			});
+			settMenu.show();
+		}
+		else{
+			splash("show");
+			getTides(e.item.subtitle, e.item.title);}
 	}
-	if(localStorage.zip2 !== "" && localStorage.zip2 !== null){
-		getTides(localStorage.zip2, "zip2");
+	else{
+	splash("show");
+	navigator.geolocation.getCurrentPosition(showPosition);
 	}
-	if(localStorage.zip3 !== "" && localStorage.zip3 !== null){
-		getTides(localStorage.zip3, "zip3");
-	}
-	if(localStorage.zip4 !== "" && localStorage.zip4 !== null){
-		getTides(localStorage.zip4, "zip4");
-	}
-    if(localStorage.zip5 !== "" && localStorage.zip5 !== null){
-		getTides(localStorage.zip5, "zip5");
-	}
-	if(localStorage.zip6 !== "" && localStorage.zip6 !== null){
-		getTides(localStorage.zip6, "zip6");
-	}
-	if(localStorage.zip7 !== "" && localStorage.zip7 !== null){
-		getTides(localStorage.zip7, "zip7");
-	}
+});
+	menu.show();
 }
-
 //Apply Selected Configuration Options
 function setUp(options){
 	console.log("setup called");
-	localStorage.useGPS = options.gps;
-	localStorage.zip1 = options.zip1;
-	localStorage.zip2 = options.zip2;
-	localStorage.zip3 = options.zip3;
-	localStorage.zip4 = options.zip4;
-	localStorage.zip5 = options.zip5;
-	localStorage.zip6 = options.zip6;
-	localStorage.zip7 = options.zip7;
-	localStorage.configText = options.configText;
-	localStorage.hourFormat = options.hourFormat;
-	if(localStorage.configText=="on")
-	{mainPage(currentConfigText+"\n\n");}
-	else{mainPage("");}
+	allTideData = options;
+	localStorage.allTideData = JSON.stringify(allTideData);
+	menu.hide();
+	makeMenu();
 }
-
-//
-//Pebble Listeners
-//
-Pebble.addEventListener("showConfiguration", function(e) {
-	Pebble.openURL("http://mikedombrowski.com/pebbletides-config.html?loc1="+encodeURIComponent(localStorage.zip1)+"&loc2="+encodeURIComponent(localStorage.zip2)+"&loc3="+encodeURIComponent(localStorage.zip3)+"&loc4="+encodeURIComponent(localStorage.zip4)+"&loc5="+encodeURIComponent(localStorage.zip5)+"&loc6="+encodeURIComponent(localStorage.zip6)+"&loc7="+encodeURIComponent(localStorage.zip7)+"&gps="+localStorage.useGPS+"&configText="+localStorage.configText+"&hourFormat="+localStorage.hourFormat);
-});
-Pebble.addEventListener("webviewclosed", function(e) {
+Settings.config(
+  { url: "http://mikedombrowski.com/pebtides/version/"+version+"/config.html?data="+encodeURIComponent(JSON.stringify(allTideData))},
+  function(e) {
+	console.log('opening configurable'+"http://mikedombrowski.com/pebtides/version/"+version+"/config.html?data="+encodeURIComponent(JSON.stringify(allTideData)));
+  },
+  function(e) {
 	var options = JSON.parse(decodeURIComponent(e.response));
 	console.log("Options = " + JSON.stringify(options));
-	if(options.gps == "on" || options.gps == "off"){
+	if(options.hourFormat == "12h" || options.hourFormat == "24h"){
 		setUp(options);
 	}
-});
-
-//
-//Simply.js Stuff
-//
-simply.on('singleClick', function(e) {
-	if(e.button == "select"){
-		runPos();}
-});
-if(localStorage.configText=="on")
-{mainPage(currentConfigText+"\n\n");}
-else{mainPage("");}
-
-function mainPage(configText){
-	simply.scrollable(true);
-	simply.style("small");
-	simply.setText({
-		title: 'Tide Aware',
-		body: 'Press \'Select\' to Get Tides.\n\n'+configText+'By Michael Dombrowski\nMikeDombrowski.com\n\nVersion '+version+'\n\n'+localStorage.printer,}, true);
-}
+  }
+);
+makeMenu();

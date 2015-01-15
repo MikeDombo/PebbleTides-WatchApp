@@ -6,12 +6,11 @@
     ],
     "companyName": "Mike Dombrowski",
     "longName": "Tide Aware",
-    "projectType": "simplyjs",
+    "projectType": "pebblejs",
     "resources": {
         "media": [
             {
                 "file": "images/menu_icon.png",
-                "menuIcon": true,
                 "name": "IMAGE_MENU_ICON",
                 "type": "png"
             },
@@ -21,16 +20,27 @@
                 "type": "png"
             },
             {
+                "file": "images/tile_splash.png",
+                "name": "IMAGE_TILE_SPLASH",
+                "type": "png"
+            },
+            {
                 "file": "fonts/UbuntuMono-Regular.ttf",
                 "name": "MONO_FONT_14",
                 "type": "font"
+            },
+            {
+                "file": "images/ta.png",
+                "menuIcon": true,
+                "name": "IMAGES_TA_PNG",
+                "type": "png"
             }
         ]
     },
     "shortName": "Tide Aware",
     "uuid": "7c9fbbd9-2a8b-4198-bf1b-fd786e0337d0",
-    "versionCode": 16,
-    "versionLabel": "2.6.5",
+    "versionCode": 1,
+    "versionLabel": "3.3",
     "watchapp": {
         "watchface": false
     }
