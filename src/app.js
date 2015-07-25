@@ -2,7 +2,7 @@ var UI = require('ui');
 var ajax = require('ajax');
 var Vector2 = require('vector2');
 var Settings = require('settings');
-var version = '3.3';
+var version = '3.4';
 var window = new UI.Window({background: 'black'});
 		var text = new UI.Text({
 		position: new Vector2(0, 30),
@@ -45,7 +45,7 @@ function updateCheck(){
 }
 
 updateCheck();
-function parseTide(response, name){
+function parseTide(response, name, index){
 //setup Vars
 	var responseMessage;	
 	var tideLevel;
@@ -57,21 +57,25 @@ function parseTide(response, name){
 	var tideHeight;
 	var currTime = Math.round(Date.now()/1000);
 	if (response.success === true && response.error === null) {
-		tideLevel = response.response[0].periods[0].type;
-		tideHeightFt = response.response[0].periods[0].heightFT;
-		tideHeightM = response.response[0].periods[0].heightM;
+		tideLevel = response.response[0].periods[index].type;
+		tideHeightFt = response.response[0].periods[index].heightFT;
+		tideHeightM = response.response[0].periods[index].heightM;
 		if(allTideData.units == "M"){
 			tideHeight = tideHeightM+" meters";
 		}
 		else{
 			tideHeight = tideHeightFt+" feet";
 		}
-		tideTime = response.response[0].periods[0].timestamp;
+		tideTime = response.response[0].periods[index].timestamp;
 		city = ((response.response[0].place.name).substring(0,1)).toUpperCase()+(response.response[0].place.name).substring(1);
 		state = (response.response[0].place.state).toUpperCase();
-		var time = response.response[0].periods[0].dateTimeISO.substring(11,16);
+		var time = response.response[0].periods[index].dateTimeISO.substring(11,16);
 		if(allTideData.hourFormat == "12h" && parseInt(time.substring(0,2))>12){
-			time = (parseInt(time.substring(0,2))-12)+time.substring(2)+"PM";
+			time = (parseInt(time.substring(0,2))-12)+time.substring(2)+" PM";
+		}
+		else if(allTideData.hourFormat == "12h"){time = time.substring(0,2)+time.substring(2)+" AM";}
+		if (time.substring(0,2)=='00'){
+			time = '12:'+time.substring(3, time.length);
 		}
 		var diffTime = tideTime - currTime;
 		var tide;
@@ -122,13 +126,31 @@ function getTides(zip, name) {
 	console.log("called getTides using: "+zip);
 	ajax(
   {
-    url: 'http://api.aerisapi.com/tides/closest?p='+zip+'&client_id=eOQzJRTGPtPKdfokmpGQ9&client_secret=Elmx32lruftjejQDJWmyAgd1FMEp98LHHk9aVasg&radius=1000mi&from=-8hours&plimit=2&psort=dt',
+    url: 'http://api.aerisapi.com/tides/closest?p='+zip+'&client_id=eOQzJRTGPtPKdfokmpGQ9&client_secret=Elmx32lruftjejQDJWmyAgd1FMEp98LHHk9aVasg&radius=1000mi&from=-8hours&to=+7days&plimit=5&psort=dt',
     type: 'json'
   },
   function(data) {
     // Success!
     console.log('success'+JSON.stringify(data));
-	parseTide(data, name);
+	var tideMen = [];
+	for (var i=0; i<data.response[0].periods.length; i++){
+		var time = data.response[0].periods[i].dateTimeISO.substring(11,16);
+		if(allTideData.hourFormat == "12h" && parseInt(time.substring(0,2))>12){
+			time = (parseInt(time.substring(0,2))-12)+time.substring(2)+" PM";
+		}
+		else if(allTideData.hourFormat == "12h"){time = time.substring(0,2)+time.substring(2)+" AM";}
+		if (time.substring(0,2)=='00'){
+			time = '12:'+time.substring(3, time.length);
+		}
+		var level = data.response[0].periods[i].type;
+		if (level == 'h'){level = "High";}
+		else {level = 'Low';}
+		tideMen.push({title:level+' Tide', subtitle:time});
+	}
+	var locationName = ((data.response[0].place.name).substring(0,1)).toUpperCase()+(data.response[0].place.name).substring(1) + ', '+ (data.response[0].place.state).toUpperCase();
+	var tideMenu = new UI.Menu({sections: [{title: 'Tides in '+locationName, items: tideMen}]});
+	tideMenu.on('select', function(e){parseTide(data, name, e.itemIndex);});
+	tideMenu.show();
   },
   function(error) {
     // Failure!

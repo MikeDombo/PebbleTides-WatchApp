@@ -37,10 +37,11 @@
             }
         ]
     },
+    "sdkVersion": "3",
     "shortName": "Tide Aware",
     "uuid": "7c9fbbd9-2a8b-4198-bf1b-fd786e0337d0",
     "versionCode": 1,
-    "versionLabel": "3.3",
+    "versionLabel": "3.4",
     "watchapp": {
         "watchface": false
     }
