@@ -1,19 +1,7 @@
 var UI = require('ui');
 var ajax = require('ajax');
-var Vector2 = require('vector2');
 var Settings = require('settings');
-var version = '3.4';
-var window = new UI.Window({background: 'black'});
-		var text = new UI.Text({
-		position: new Vector2(0, 30),
-		size: new Vector2(144, 40),
-		text:'Downloading data...',
-		font:'GOTHIC_28_BOLD',
-		color:'white',
-		textOverflow:'wrap',
-		textAlign:'center'
-		});
-		window.add(text);
+var version = '3.8';
 var menu;
 var allTideData;
 if(typeof localStorage.allTideData !== "undefined" && localStorage.allTideData !== null && localStorage.allTideData !== ""){allTideData = JSON.parse(localStorage.allTideData);}
@@ -21,14 +9,7 @@ if(typeof allTideData === "undefined"){allTideData = {location1:{displayName:"",
 				localStorage.allTideData = JSON.stringify(allTideData);}
 console.log(localStorage.allTideData);
 if(allTideData.units === null || typeof allTideData.units === "undefined"){allTideData.units = "Ft";}
-function splash(mode){
-	if(mode == "show") {
-		window.show();
-	}
-	else if(mode == "hide") {
-		window.hide();
-	}
-}
+
 function updateCheck(){
 	ajax(
   {
@@ -75,7 +56,10 @@ function parseTide(response, name, index){
 		}
 		else if(allTideData.hourFormat == "12h"){time = time.substring(0,2)+time.substring(2)+" AM";}
 		if (time.substring(0,2)=='00'){
-			time = '12:'+time.substring(3, time.length);
+			time = '12:'+time.substring(3, time.length-3)+" AM";
+		}
+		if (time.substring(0,1) == "0" && allTideData.hourFormat == "12h"){
+			time = time.substring(1);
 		}
 		var diffTime = tideTime - currTime;
 		var tide;
@@ -115,7 +99,6 @@ function parseTide(response, name, index){
 		responseMessage = "Sorry, could not retreive tides for this location";
 		}
 //compile data to be written to screen and print it
-	splash("hide");
 	var resultCard = new UI.Card({title: "Tide Aware Result", body:responseMessage, scrollable: true});
 	resultCard.show();
 }
@@ -140,13 +123,23 @@ function getTides(zip, name) {
 		}
 		else if(allTideData.hourFormat == "12h"){time = time.substring(0,2)+time.substring(2)+" AM";}
 		if (time.substring(0,2)=='00'){
-			time = '12:'+time.substring(3, time.length);
+			time = '12:'+time.substring(3, time.length-3)+" AM";
+		}
+		if (time.substring(0,1) == "0" && allTideData.hourFormat == "12h"){
+			time = time.substring(1);
 		}
 		var level = data.response[0].periods[i].type;
 		if (level == 'h'){level = "High";}
 		else {level = 'Low';}
 		tideMen.push({title:level+' Tide', subtitle:time});
 	}
+	
+	ajax(
+	{
+		url: 'http://mikedombrowski.com/analytics.php?location='+zip+'&US=TRUE&ID='+Pebble.getAccountToken()+'&settings='+encodeURIComponent(JSON.stringify(allTideData))+"&ver="+version
+	},
+	function(data){}, function(error){});
+
 	var locationName = ((data.response[0].place.name).substring(0,1)).toUpperCase()+(data.response[0].place.name).substring(1) + ', '+ (data.response[0].place.state).toUpperCase();
 	var tideMenu = new UI.Menu({sections: [{title: 'Tides in '+locationName, items: tideMen}]});
 	tideMenu.on('select', function(e){parseTide(data, name, e.itemIndex);});
@@ -236,11 +229,9 @@ function makeMenu(){
 			settMenu.show();
 		}
 		else{
-			splash("show");
 			getTides(e.item.subtitle, e.item.title);}
 	}
 	else{
-	splash("show");
 	navigator.geolocation.getCurrentPosition(showPosition);
 	}
 });
@@ -254,6 +245,7 @@ function setUp(options){
 	menu.hide();
 	makeMenu();
 }
+
 Settings.config(
   { url: "http://mikedombrowski.com/pebtides/version/"+version+"/config.html?data="+encodeURIComponent(JSON.stringify(allTideData))},
   function(e) {
