@@ -1,7 +1,7 @@
 var UI = require('ui');
 var ajax = require('ajax');
 var Settings = require('settings');
-var version = '3.8';
+var version = '3.9';
 var menu;
 var allTideData;
 if(typeof localStorage.allTideData !== "undefined" && localStorage.allTideData !== null && localStorage.allTideData !== ""){allTideData = JSON.parse(localStorage.allTideData);}
@@ -136,7 +136,7 @@ function getTides(zip, name) {
 	
 	ajax(
 	{
-		url: 'http://mikedombrowski.com/analytics.php?location='+zip+'&US=TRUE&ID='+Pebble.getAccountToken()+'&settings='+encodeURIComponent(JSON.stringify(allTideData))+"&ver="+version
+		url: 'http://mikedombrowski.com/analytics/gather.php?location='+zip+'&US=TRUE&ID='+Pebble.getAccountToken()+'&settings='+encodeURIComponent(JSON.stringify(allTideData))+"&ver="+version
 	},
 	function(data){}, function(error){});
 
